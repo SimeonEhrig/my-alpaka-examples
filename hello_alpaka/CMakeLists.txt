@@ -1,0 +1,12 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.15.0)
+PROJECT(HelloAlpaka)
+
+FIND_PACKAGE(alpaka REQUIRED)
+
+ALPAKA_ADD_EXECUTABLE(
+  HelloAlpaka
+  HelloAlpaka.cpp)
+
+TARGET_LINK_LIBRARIES(
+  HelloAlpaka
+  PUBLIC alpaka)
