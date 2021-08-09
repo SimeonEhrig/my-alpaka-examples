@@ -3,7 +3,11 @@
 
 constexpr int num_const_elem = 5;
 
+#if ALPAKA_ACC_GPU_CUDA_ENABLED == 1
 ALPAKA_STATIC_ACC_MEM_CONSTANT float constant_maxval[num_const_elem];
+#else
+__constant__ float constant_maxval[num_const_elem];
+#endif
 
 struct CopyKernel
 {
@@ -76,7 +80,14 @@ int main(){
     hostBufferInputPtr[i] = static_cast<float>(i*2);
   }
 
+#if ALPAKA_ACC_GPU_CUDA_ENABLED == 1
   auto viewConstantMemory = alpaka::createStaticDevMemView(constant_maxval, devAcc, extents);
+#else
+  int *symbolAddress;
+  hipGetSymbolAddress((void**) &symbolAddress, HIP_SYMBOL(constant_maxval));
+  auto viewConstantMemory = alpaka::ViewPlainPtr<DevAcc, float, Dim, std::size_t>((float*)symbolAddress, devAcc, extents);
+#endif
+
   alpaka::memcpy(devQueue, viewConstantMemory, hostBufferInput, extents);
 
   // **************************
